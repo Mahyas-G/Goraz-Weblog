@@ -1,0 +1,11 @@
+# Environment
+.env
+
+# Build artifacts
+/server
+/bin/
+
+# Uploaded content (real user files shouldn't go into git; the folder
+# itself is kept via .gitkeep)
+web/static/uploads/*
+!web/static/uploads/.gitkeep
