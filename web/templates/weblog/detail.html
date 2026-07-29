@@ -1,0 +1,11 @@
+{{define "content"}}
+<h1>{{.Board.Title}}</h1>
+<p>By {{.Board.AuthorUsername}} &mdash; {{.Board.Privacy}}</p>
+<p>{{.Board.Content}}</p>
+{{if .IsAuthor}}
+<form method="POST" action="/weblog/{{.Board.ID}}/delete">
+<button type="submit">Delete</button>
+</form>
+{{end}}
+<p><a href="/weblog">Back to feed</a></p>
+{{end}}

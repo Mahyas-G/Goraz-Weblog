@@ -1,0 +1,11 @@
+{{define "content"}}
+<h1>Weblog</h1>
+<p><a href="/weblog/new">New Post</a></p>
+<ul>
+{{range .Boards}}
+<li>
+<a href="/weblog/{{.ID}}">{{.Title}}</a> &mdash; {{.AuthorUsername}} ({{.Privacy}})
+</li>
+{{end}}
+</ul>
+{{end}}
