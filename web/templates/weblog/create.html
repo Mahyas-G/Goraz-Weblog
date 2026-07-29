@@ -1,0 +1,14 @@
+{{define "content"}}
+<h1>New Post</h1>
+{{if .Error}}<p>{{.Error}}</p>{{end}}
+<form method="POST" action="/weblog">
+<input type="text" name="title" placeholder="Title" required>
+<textarea name="content" placeholder="Content" required></textarea>
+<select name="privacy">
+<option value="public">Public</option>
+<option value="private">Private</option>
+</select>
+<button type="submit">Publish</button>
+</form>
+<p><a href="/weblog">Back to feed</a></p>
+{{end}}
