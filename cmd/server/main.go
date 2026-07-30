@@ -52,6 +52,11 @@ func main() {
 	authService := service.NewAuthService(userRepo, sessionStore)
 	authHandler := handler.NewAuthHandler(authService)
 
+	boardRepo := repository.NewBoardRepository(database)
+	shareRepo := repository.NewShareRepository(database)
+	boardService := service.NewBoardService(boardRepo, shareRepo, userRepo)
+	boardHandler := handler.NewBoardHandler(boardService)
+
 	e := echo.New()
 	e.Renderer = &TemplateRenderer{}
 	e.Use(echomw.Logger())
@@ -75,10 +80,18 @@ func main() {
 	e.POST("/login", authHandler.Login)
 	e.POST("/logout", authHandler.Logout, appmw.RequireAuth)
 
+	e.GET("/weblog", boardHandler.Feed, appmw.RequireAuth)
+	e.GET("/weblog/new", boardHandler.ShowCreateForm, appmw.RequireAuth)
+	e.POST("/weblog", boardHandler.Create, appmw.RequireAuth)
+	e.GET("/weblog/:id", boardHandler.Detail, appmw.RequireAuth)
+	e.POST("/weblog/:id/delete", boardHandler.Delete, appmw.RequireAuth)
+
 	e.GET("/", func(c echo.Context) error {
-		user := appmw.CurrentUser(c)
-		return c.String(http.StatusOK, "Logged in as "+user.Username)
-	}, appmw.RequireAuth)
+		if appmw.CurrentUser(c) != nil {
+			return c.Redirect(http.StatusSeeOther, "/weblog")
+		}
+		return c.Redirect(http.StatusSeeOther, "/login")
+	})
 
 	log.Info("server starting", "port", cfg.Port)
 	if err := e.Start(":" + cfg.Port); err != nil {
