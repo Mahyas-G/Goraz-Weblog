@@ -1,0 +1,15 @@
+{{define "navbar"}}
+<nav>
+<a href="/weblog">Weblog</a>
+{{if .CurrentUser}}
+<span>Logged in as {{.CurrentUser.Username}}</span>
+<form method="POST" action="/logout" class="inline-form">
+<input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+<button type="submit">Logout</button>
+</form>
+{{else}}
+<a href="/login">Login</a>
+<a href="/signup">Sign up</a>
+{{end}}
+</nav>
+{{end}}

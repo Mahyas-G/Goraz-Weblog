@@ -69,6 +69,14 @@ func (s *SessionStore) Delete(token string) error {
 	return err
 }
 
+func (s *SessionStore) DeleteExpired() (int64, error) {
+	result, err := s.db.Exec(`DELETE FROM sessions WHERE expires_at < now()`)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 func generateToken() (string, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {

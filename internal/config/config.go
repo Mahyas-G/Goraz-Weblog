@@ -6,14 +6,16 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string
-	Port        string
+	DatabaseURL  string
+	Port         string
+	CookieSecure bool
 }
 
 func Load(envGetter func(string) string) (*Config, error) {
 	cfg := &Config{
-		DatabaseURL: envGetter("DATABASE_URL"),
-		Port:        orDefault(envGetter("PORT"), "8080"),
+		DatabaseURL:  envGetter("DATABASE_URL"),
+		Port:         orDefault(envGetter("PORT"), "8080"),
+		CookieSecure: envGetter("COOKIE_SECURE") == "true",
 	}
 
 	if cfg.DatabaseURL == "" {

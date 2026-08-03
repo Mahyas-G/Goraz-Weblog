@@ -3,10 +3,13 @@ package service
 import (
 	"errors"
 	"fmt"
+	"log/slog"
+	"mime/multipart"
 	"strings"
 
 	"weblog/internal/model"
 	"weblog/internal/repository"
+	"weblog/internal/upload"
 	"weblog/internal/validation"
 )
 
@@ -24,13 +27,14 @@ type BoardService struct {
 	boards *repository.BoardRepository
 	shares *repository.ShareRepository
 	users  *repository.UserRepository
+	logger *slog.Logger
 }
 
-func NewBoardService(boards *repository.BoardRepository, shares *repository.ShareRepository, users *repository.UserRepository) *BoardService {
-	return &BoardService{boards: boards, shares: shares, users: users}
+func NewBoardService(boards *repository.BoardRepository, shares *repository.ShareRepository, users *repository.UserRepository, logger *slog.Logger) *BoardService {
+	return &BoardService{boards: boards, shares: shares, users: users, logger: logger}
 }
 
-func (s *BoardService) Create(title, content string, imagePath *string, authorID int, privacy string, sharedUsernames []string) (*model.Board, error) {
+func (s *BoardService) Create(title, content string, imageFile *multipart.FileHeader, authorID int, privacy string, sharedUsernames []string) (*model.Board, error) {
 	title = strings.TrimSpace(title)
 	content = strings.TrimSpace(content)
 	privacy = strings.TrimSpace(privacy)
@@ -54,7 +58,26 @@ func (s *BoardService) Create(title, content string, imagePath *string, authorID
 		sharedUserIDs = ids
 	}
 
-	return s.boards.Create(title, content, imagePath, authorID, privacy, sharedUserIDs)
+	var imagePath *string
+	if imageFile != nil {
+		path, err := upload.Save(imageFile)
+		if err != nil {
+			return nil, err
+		}
+		imagePath = &path
+	}
+
+	board, err := s.boards.Create(title, content, imagePath, authorID, privacy, sharedUserIDs)
+	if err != nil {
+		if imagePath != nil {
+			if delErr := upload.Delete(*imagePath); delErr != nil {
+				s.logger.Error("failed to delete orphaned image file", "path", *imagePath, "error", delErr)
+			}
+		}
+		return nil, err
+	}
+
+	return board, nil
 }
 
 func (s *BoardService) Feed(userID int) ([]model.Board, error) {
@@ -85,6 +108,13 @@ func (s *BoardService) Delete(boardID, userID int) error {
 	if !deleted {
 		return repository.ErrBoardNotFound
 	}
+
+	if board.ImagePath != nil {
+		if err := upload.Delete(*board.ImagePath); err != nil {
+			s.logger.Error("failed to delete image file", "path", *board.ImagePath, "error", err)
+		}
+	}
+
 	return nil
 }
 

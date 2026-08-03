@@ -5,6 +5,7 @@
 {{range .Boards}}
 <li>
 <a href="/weblog/{{.ID}}">{{.Title}}</a> &mdash; {{.AuthorUsername}} ({{.Privacy}})
+{{if .ImagePath}}<br><img src="{{.ImagePath}}" alt="" width="150">{{end}}
 </li>
 {{end}}
 </ul>

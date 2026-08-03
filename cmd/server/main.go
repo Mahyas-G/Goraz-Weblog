@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -21,13 +23,49 @@ import (
 	"weblog/internal/service"
 )
 
-type TemplateRenderer struct{}
+var templatePages = []string{
+	"auth/signup.html",
+	"auth/login.html",
+	"weblog/feed.html",
+	"weblog/create.html",
+	"weblog/detail.html",
+}
+
+type TemplateRenderer struct {
+	templates map[string]*template.Template
+}
+
+func NewTemplateRenderer() (*TemplateRenderer, error) {
+	templates := make(map[string]*template.Template)
+
+	for _, page := range templatePages {
+		tmpl, err := template.ParseFiles(
+			"web/templates/layouts/base.html",
+			"web/templates/partials/navbar.html",
+			"web/templates/"+page,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("parsing template %q: %w", page, err)
+		}
+		templates[page] = tmpl
+	}
+
+	return &TemplateRenderer{templates: templates}, nil
+}
 
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	tmpl, err := template.ParseFiles("web/templates/layouts/base.html", "web/templates/"+name)
-	if err != nil {
-		return err
+	tmpl, ok := t.templates[name]
+	if !ok {
+		return fmt.Errorf("template %q not registered", name)
 	}
+
+	if m, ok := data.(map[string]any); ok {
+		m["CurrentUser"] = appmw.CurrentUser(c)
+		if token, ok := c.Get("csrf").(string); ok {
+			m["CSRFToken"] = token
+		}
+	}
+
 	return tmpl.ExecuteTemplate(w, "base", data)
 }
 
@@ -47,20 +85,37 @@ func main() {
 	}
 	defer database.Close()
 
+	renderer, err := NewTemplateRenderer()
+	if err != nil {
+		log.Error("template error", "error", err)
+		os.Exit(1)
+	}
+
 	userRepo := repository.NewUserRepository(database)
 	sessionStore := auth.NewSessionStore(database)
 	authService := service.NewAuthService(userRepo, sessionStore)
-	authHandler := handler.NewAuthHandler(authService)
+	authHandler := handler.NewAuthHandler(authService, cfg.CookieSecure)
 
 	boardRepo := repository.NewBoardRepository(database)
 	shareRepo := repository.NewShareRepository(database)
-	boardService := service.NewBoardService(boardRepo, shareRepo, userRepo)
-	boardHandler := handler.NewBoardHandler(boardService)
+	boardService := service.NewBoardService(boardRepo, shareRepo, userRepo, log)
+
+	commentRepo := repository.NewCommentRepository(database)
+	commentService := service.NewCommentService(commentRepo, boardRepo)
+	commentHandler := handler.NewCommentHandler(commentService, boardService)
+
+	boardHandler := handler.NewBoardHandler(boardService, commentService)
+
+	go runSessionCleanup(sessionStore, log)
 
 	e := echo.New()
-	e.Renderer = &TemplateRenderer{}
+	e.Renderer = renderer
 	e.Use(echomw.Logger())
 	e.Use(echomw.Recover())
+	e.Use(echomw.BodyLimit("10M"))
+	e.Use(echomw.CSRFWithConfig(echomw.CSRFConfig{
+		TokenLookup: "form:csrf_token",
+	}))
 	e.Use(appmw.LoadCurrentUser(authService))
 
 	e.Static("/static", "web/static")
@@ -85,6 +140,7 @@ func main() {
 	e.POST("/weblog", boardHandler.Create, appmw.RequireAuth)
 	e.GET("/weblog/:id", boardHandler.Detail, appmw.RequireAuth)
 	e.POST("/weblog/:id/delete", boardHandler.Delete, appmw.RequireAuth)
+	e.POST("/weblog/:id/comments", commentHandler.Create, appmw.RequireAuth)
 
 	e.GET("/", func(c echo.Context) error {
 		if appmw.CurrentUser(c) != nil {
@@ -97,5 +153,26 @@ func main() {
 	if err := e.Start(":" + cfg.Port); err != nil {
 		log.Error("server error", "error", err)
 		os.Exit(1)
+	}
+}
+
+func runSessionCleanup(sessionStore *auth.SessionStore, log *slog.Logger) {
+	cleanup := func() {
+		deleted, err := sessionStore.DeleteExpired()
+		if err != nil {
+			log.Error("session cleanup failed", "error", err)
+			return
+		}
+		if deleted > 0 {
+			log.Info("session cleanup completed", "deleted", deleted)
+		}
+	}
+
+	cleanup()
+
+	ticker := time.NewTicker(24 * time.Hour)
+	defer ticker.Stop()
+	for range ticker.C {
+		cleanup()
 	}
 }

@@ -11,11 +11,12 @@ import (
 )
 
 type AuthHandler struct {
-	authService *service.AuthService
+	authService  *service.AuthService
+	cookieSecure bool
 }
 
-func NewAuthHandler(authService *service.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+func NewAuthHandler(authService *service.AuthService, cookieSecure bool) *AuthHandler {
+	return &AuthHandler{authService: authService, cookieSecure: cookieSecure}
 }
 
 func (h *AuthHandler) ShowSignupForm(c echo.Context) error {
@@ -53,6 +54,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	cookie.Expires = session.ExpiresAt
 	cookie.Path = "/"
 	cookie.HttpOnly = true
+	cookie.Secure = h.cookieSecure
 	cookie.SameSite = http.SameSiteLaxMode
 	c.SetCookie(cookie)
 

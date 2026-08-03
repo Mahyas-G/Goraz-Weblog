@@ -2,6 +2,7 @@
 <h1>Sign Up</h1>
 {{if .Error}}<p>{{.Error}}</p>{{end}}
 <form method="POST" action="/signup">
+<input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 <input type="text" name="username" placeholder="Username" required>
 <input type="password" name="password" placeholder="Password" required>
 <button type="submit">Sign Up</button>
