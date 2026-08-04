@@ -10,7 +10,7 @@ The application supports authentication, public and private weblog posts, privat
 
 🚀 **Production URL**
 
-`https://weblog-app.up.railway.app`
+`https://goraz-weblog.up.railway.app`
 
 ---
 
