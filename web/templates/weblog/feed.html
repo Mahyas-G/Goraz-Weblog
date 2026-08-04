@@ -1,12 +1,24 @@
 {{define "content"}}
 <h1>Weblog</h1>
-<p><a href="/weblog/new">New Post</a></p>
-<ul>
+<p><a href="/weblog/new" class="btn btn-sm">New Post</a></p>
+{{if .Boards}}
+<div class="post-grid">
 {{range .Boards}}
-<li>
-<a href="/weblog/{{.ID}}">{{.Title}}</a> &mdash; {{.AuthorUsername}} ({{.Privacy}})
-{{if .ImagePath}}<br><img src="{{.ImagePath}}" alt="" width="150">{{end}}
-</li>
+<a class="post-card" href="/weblog/{{.ID}}">
+{{if .ImagePath}}
+<div class="post-card-image"><img src="{{.ImagePath}}" alt=""></div>
 {{end}}
-</ul>
+<div class="post-card-body">
+<span class="badge badge-{{.Privacy}}">{{.Privacy}}</span>
+<h3 class="post-card-title">{{.Title}}</h3>
+<p class="post-card-meta">{{.AuthorUsername}}</p>
+<p class="post-card-excerpt">{{.Content}}</p>
+<span class="read-more">Read more &rsaquo;</span>
+</div>
+</a>
+{{end}}
+</div>
+{{else}}
+<p class="empty-state">No posts yet. Be the first to share something.</p>
+{{end}}
 {{end}}

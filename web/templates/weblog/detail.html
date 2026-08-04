@@ -1,33 +1,48 @@
 {{define "content"}}
+<div class="post-detail">
 <h1>{{.Board.Title}}</h1>
-<p>By {{.Board.AuthorUsername}} &mdash; {{.Board.Privacy}}</p>
+<div class="post-detail-meta">
+<span class="badge badge-{{.Board.Privacy}}">{{.Board.Privacy}}</span>
+<span>{{.Board.AuthorUsername}}</span>
+</div>
 {{if .Board.ImagePath}}
-<p><img src="{{.Board.ImagePath}}" alt="{{.Board.Title}}"></p>
+<div class="post-detail-image"><img src="{{.Board.ImagePath}}" alt="{{.Board.Title}}"></div>
 {{end}}
 <p>{{.Board.Content}}</p>
 {{if .SharedWith}}
-<p>Shared with: {{range .SharedWith}}{{.}} {{end}}</p>
+<div class="shared-with">
+<span>Shared with:</span>
+{{range .SharedWith}}<span class="tag">{{.}}</span>{{end}}
+</div>
 {{end}}
 {{if .IsAuthor}}
 <form method="POST" action="/weblog/{{.Board.ID}}/delete">
 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-<button type="submit">Delete</button>
+<button type="submit" class="btn-danger btn-sm">Delete</button>
 </form>
 {{end}}
 
-<h2>Comments</h2>
-<ul>
+<div class="comments-section">
+<h2>Comments{{if .Comments}} &middot; {{len .Comments}}{{end}}</h2>
+{{if .Comments}}
 {{range .Comments}}
-<li><strong>{{.AuthorUsername}}</strong>: {{.Content}}</li>
+<div class="comment">
+<div class="avatar">{{slice .AuthorUsername 0 1}}</div>
+<div class="comment-body"><span class="comment-author">{{.AuthorUsername}}</span>{{.Content}}</div>
+</div>
 {{end}}
-</ul>
+{{else}}
+<p class="empty-state">No comments yet.</p>
+{{end}}
 
-{{if .CommentError}}<p>{{.CommentError}}</p>{{end}}
+{{if .CommentError}}<p class="error-text">{{.CommentError}}</p>{{end}}
 <form method="POST" action="/weblog/{{.Board.ID}}/comments">
 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 <textarea name="content" placeholder="Write a comment" required>{{.CommentContent}}</textarea>
-<button type="submit">Comment</button>
+<button type="submit" class="btn-sm">Comment</button>
 </form>
+</div>
 
-<p><a href="/weblog">Back to feed</a></p>
+</div>
+<p style="margin-top: 1rem;"><a href="/weblog">&larr; Back to feed</a></p>
 {{end}}

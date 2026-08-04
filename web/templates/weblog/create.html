@@ -1,6 +1,6 @@
 {{define "content"}}
 <h1>New Post</h1>
-{{if .Error}}<p>{{.Error}}</p>{{end}}
+{{if .Error}}<p class="error-text">{{.Error}}</p>{{end}}
 <form method="POST" action="/weblog" enctype="multipart/form-data">
 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 <input type="text" name="title" placeholder="Title" value="{{.Title}}" required>
