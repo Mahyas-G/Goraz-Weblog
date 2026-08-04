@@ -1,6 +1,7 @@
 {{define "content"}}
+<div class="auth-card">
 <h1>Log In</h1>
-{{if .Error}}<p>{{.Error}}</p>{{end}}
+{{if .Error}}<p class="error-text">{{.Error}}</p>{{end}}
 <form method="POST" action="/login">
 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 <input type="text" name="username" placeholder="Username" required>
@@ -8,4 +9,5 @@
 <button type="submit">Log In</button>
 </form>
 <p><a href="/signup">Need an account? Sign up</a></p>
+</div>
 {{end}}
