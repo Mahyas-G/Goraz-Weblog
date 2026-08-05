@@ -112,7 +112,7 @@ func main() {
 	e.Renderer = renderer
 	e.Use(echomw.Logger())
 	e.Use(echomw.Recover())
-	e.Use(echomw.BodyLimit("20M"))
+	e.Use(echomw.BodyLimit("5M"))
 	e.Use(echomw.CSRFWithConfig(echomw.CSRFConfig{
 		TokenLookup: "form:csrf_token",
 	}))
