@@ -16,9 +16,9 @@
 </div>
 {{end}}
 {{if .IsAuthor}}
-<form method="POST" action="/weblog/{{.Board.ID}}/delete">
+<form method="POST" action="/weblog/{{.Board.ID}}/delete" class="delete-form">
 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-<button type="submit" class="btn-danger btn-sm">Delete</button>
+<button type="submit" class="btn-danger">Delete</button>
 </form>
 {{end}}
 
