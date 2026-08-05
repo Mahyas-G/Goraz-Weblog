@@ -63,7 +63,7 @@ nav .nav-left {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: 1rem;
+	gap: 2rem;
 }
 
 nav .brand {
