@@ -136,7 +136,7 @@ cd Goraz-Weblog
 Create a `.env` file:
 
 ```env
-DATABASE_URL=postgres://user:password@localhost:5432/weblog
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/weblog?sslmode=disable
 PORT=8080
 COOKIE_SECURE=false
 ```

@@ -431,3 +431,23 @@ textarea {
 	font-weight: 700;
 	margin-right: 0.3rem;
 }
+
+.upload-progress-wrap {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.upload-progress-wrap progress {
+	flex: 1;
+	height: 8px;
+	border-radius: 999px;
+	overflow: hidden;
+	accent-color: var(--navy);
+}
+
+.upload-progress-wrap span {
+	font-size: 0.78rem;
+	color: var(--text-muted);
+	min-width: 2.5rem;
+}
