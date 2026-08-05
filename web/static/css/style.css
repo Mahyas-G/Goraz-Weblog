@@ -47,7 +47,6 @@ img {
 	display: block;
 }
 
-/* Navbar */
 nav {
 	display: flex;
 	align-items: center;
@@ -57,6 +56,12 @@ nav {
 	padding-bottom: 1.25rem;
 	margin-bottom: 2rem;
 	border-bottom: 1px solid var(--border);
+}
+
+nav .nav-left {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
 }
 
 nav .brand {
@@ -107,9 +112,9 @@ nav .nav-links {
 	margin: 0;
 	max-width: none;
 	display: inline-flex;
+	align-items: center;
 }
 
-/* Buttons */
 button, .btn {
 	font: inherit;
 	font-size: 0.85rem;
@@ -122,7 +127,8 @@ button, .btn {
 	cursor: pointer;
 	text-decoration: none;
 	display: inline-block;
-	align-self: flex-start;
+	align-self: center;
+	line-height: 1.2;
 }
 
 button:hover, .btn:hover {
@@ -152,11 +158,10 @@ button:hover, .btn:hover {
 }
 
 .btn-sm {
-	padding: 0.3rem 0.7rem;
-	font-size: 0.78rem;
+	padding: 0.4rem 0.8rem;
+	font-size: 0.8rem;
 }
 
-/* Forms */
 form {
 	display: flex;
 	flex-direction: column;
@@ -202,7 +207,6 @@ textarea {
 	font-size: 0.9rem;
 }
 
-/* Auth pages */
 .auth-card {
 	max-width: 380px;
 	margin: 2rem auto;
@@ -216,7 +220,6 @@ textarea {
 	max-width: none;
 }
 
-/* Badges */
 .badge {
 	display: inline-block;
 	font-size: 0.7rem;
@@ -237,7 +240,6 @@ textarea {
 	color: var(--navy);
 }
 
-/* Feed grid */
 .post-grid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -330,7 +332,6 @@ textarea {
 	}
 }
 
-/* Detail page */
 .post-detail {
 	background: #fff;
 	border: 1px solid var(--border);
