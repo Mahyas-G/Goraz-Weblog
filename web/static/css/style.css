@@ -128,7 +128,7 @@ button, .btn {
 	cursor: pointer;
 	text-decoration: none;
 	display: inline-block;
-	align-self: center;
+	align-self: flex-start;
 	line-height: 1.2;
 }
 
@@ -380,6 +380,10 @@ textarea {
 	padding: 0.1rem 0.6rem;
 	font-weight: 600;
 	color: var(--text);
+}
+
+.delete-form {
+	margin: 1.5rem 0 0.5rem 0;
 }
 
 .comments-section {
