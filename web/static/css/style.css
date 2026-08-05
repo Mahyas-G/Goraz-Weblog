@@ -24,6 +24,13 @@ body {
 	line-height: 1.6;
 	color: var(--text);
 	background: var(--bg);
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+}
+
+p, h1, h2, h3, span, div {
+	overflow-wrap: break-word;
+	word-wrap: break-word;
 }
 
 a {
