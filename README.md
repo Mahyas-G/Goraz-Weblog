@@ -4,13 +4,23 @@ A secure **server-side rendered (SSR) weblog application** built with **Go**, **
 
 The application supports authentication, public and private weblog posts, private post sharing, comments, image uploads, and secure session-based access control.
 
+It follows a layered architecture with separated Handler, Service, and Repository layers.
+
 ---
 
-## Live Deployment
+## Live Demo
 
-🚀 **Production URL**
+🚀 Application is deployed on Railway:
 
-`https://goraz-weblog.up.railway.app`
+[Open Live Application](https://goraz-weblog.up.railway.app)
+
+---
+
+## Source Code
+
+📦 GitHub Repository:
+
+[View Source Code](https://github.com/Mahyas-G/Goraz-Weblog)
 
 ---
 
@@ -117,8 +127,8 @@ The application supports authentication, public and private weblog posts, privat
 ### 1. Clone repository
 
 ```bash
-git clone <repository-url>
-cd Goraz-Weblog-main
+git clone https://github.com/Mahyas-G/Goraz-Weblog.git
+cd Goraz-Weblog
 ```
 
 ### 2. Configure environment
@@ -159,7 +169,7 @@ Run the application with PostgreSQL:
 docker compose up --build
 ```
 
-The application is configured for container-based deployment.
+The Docker setup runs the application together with PostgreSQL.
 
 ---
 
@@ -190,5 +200,12 @@ The application can be deployed using platforms such as:
 Deployment requires:
 
 * PostgreSQL database
-* Environment variables
-* Persistent storage for uploaded images
+* Environment variables configuration
+* Persistent storage mounted for uploaded images
+
+---
+
+
+Developed as the final project for:
+**Goraz Final Module - APA Bootcamp**
+
