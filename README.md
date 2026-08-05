@@ -14,98 +14,69 @@ The application supports authentication, public and private weblog posts, privat
 
 ---
 
-# Features
+## Features
 
-* User registration, login, and logout
-* Secure server-side sessions using random tokens
-* Public and private weblog posts
-* Sharing private posts with selected users
-* Personalized feed based on access permissions
-* Comments on accessible posts
-* Post deletion restricted to owners
-* Image upload support:
+### Authentication
 
-  * JPEG, PNG, WebP
-  * Real file-content validation
-  * Maximum size limit
-  * Randomized filenames
-  * Automatic cleanup of unused files
+* User signup and login
+* Secure password hashing using bcrypt
+* Database-backed sessions
+* Logout functionality
+
+### Weblog
+
+* Create blog posts
+* Public and private posts
+* Share private posts with selected users
+* View feed based on user permissions
+* View detailed posts
+* Delete posts only by their owners
+
+### Comments
+
+* Authenticated users can comment on accessible posts
+* Comments include author information and timestamps
+
+### Image Upload
+
+* Optional image upload for posts
+* Supported formats:
+
+  * JPEG
+  * PNG
+  * WebP
+* File validation and cleanup handling
+
+### Security
+
 * CSRF protection
-* Secure cookies
-* Docker-based deployment support
-
-> Post editing was intentionally excluded because it was outside the project requirements.
-
----
-
-# Tech Stack
-
-| Technology    | Purpose               |
-| ------------- | --------------------- |
-| Go 1.22+      | Backend               |
-| Echo v4       | Web framework         |
-| PostgreSQL 16 | Database              |
-| sqlx + pgx    | Database access       |
-| goose         | Database migrations   |
-| html/template | Server-side rendering |
-| bcrypt        | Password hashing      |
-| log/slog      | Structured logging    |
-| Docker        | Containerization      |
-| Railway       | Cloud deployment      |
+* Secure session handling
+* Input validation
+* Ownership and access control checks
+* Protected file upload validation
 
 ---
 
-# Architecture
+## Tech Stack
 
-The project follows a layered architecture:
+| Component        | Technology            |
+| ---------------- | --------------------- |
+| Language         | Go 1.22+              |
+| Framework        | Echo v4               |
+| Database         | PostgreSQL            |
+| Database Driver  | pgx + sqlx            |
+| Migration Tool   | goose                 |
+| Templates        | html/template (SSR)   |
+| Authentication   | Cookie-based sessions |
+| Password Hashing | bcrypt                |
+| Deployment       | Docker                |
 
-```text
-HTTP Request
+---
 
-      ↓
+## Project Structure
 
-Handler
-
-      ↓
-
-Service
-
-      ↓
-
-Repository
-
-      ↓
-
-PostgreSQL
 ```
-
-### Layers
-
-**Handler**
-
-* Handles HTTP requests
-* Validates input
-* Renders HTML templates
-
-**Service**
-
-* Contains business logic
-* Implements authorization rules
-
-**Repository**
-
-* Handles database operations
-
-**Model**
-
-* Defines application data structures
-
----
-
-# Project Structure
-
-```text
-weblog/
+.
 ├── cmd/
 │   └── server/
 │       └── main.go
@@ -135,220 +106,89 @@ weblog/
 
 ---
 
-# Running Locally
+## Run Locally
 
-## Requirements
-
-Install:
+### Requirements
 
 * Go 1.22+
-* Docker Desktop
-* Docker Compose
-* goose migration tool
+* PostgreSQL
+* goose (for migrations)
 
-Install goose:
+### 1. Clone repository
 
 ```bash
-go install github.com/pressly/goose/v3/cmd/goose@latest
+git clone <repository-url>
+cd Goraz-Weblog-main
 ```
 
----
+### 2. Configure environment
 
-## Environment Configuration
-
-Create `.env`:
+Create a `.env` file:
 
 ```env
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/weblog?sslmode=disable
+DATABASE_URL=postgres://user:password@localhost:5432/weblog
 PORT=8080
 COOKIE_SECURE=false
 ```
 
----
-
-# Run with Docker Compose (Recommended)
-
-Start application and PostgreSQL:
-
-```bash
-docker compose up --build
-```
-
-Run migrations:
-
-```bash
-goose -dir internal/db/migrations postgres \
-"postgres://postgres:postgres@localhost:5432/weblog?sslmode=disable" up
-```
-
-Open:
-
-```text
-http://localhost:8080
-```
-
----
-
-# Run Without Docker
-
-Start PostgreSQL manually, then:
-
-```bash
-go mod tidy
-```
-
-Run migrations:
+### 3. Run migrations
 
 ```bash
 goose -dir internal/db/migrations postgres "$DATABASE_URL" up
 ```
 
-Start application:
+### 4. Start application
 
 ```bash
 go run ./cmd/server
 ```
 
+Application will be available at:
+
+```
+http://localhost:8080
+```
+
 ---
 
-# Testing
+## Docker Deployment
 
-Run:
+Run the application with PostgreSQL:
 
 ```bash
-go vet ./...
+docker compose up --build
+```
+
+The application is configured for container-based deployment.
+
+---
+
+## Testing
+
+Run tests:
+
+```bash
 go test ./...
 ```
 
----
-
-# Railway Deployment
-
-The application is prepared for deployment using Docker and Railway.
-
-Deployment architecture:
-
-```text
-GitHub Repository
-
-        ↓
-
-Railway Service
-
-        ↓
-
-Docker Container
-
-        ↓
-
-Railway PostgreSQL
-
-        ↓
-
-Production Application
-```
-
-## Deployment Steps
-
-### 1. Create Railway Project
-
-Connect the GitHub repository:
-
-```
-New Project
-    ↓
-Deploy from GitHub Repository
-```
-
-Railway automatically detects the Dockerfile.
-
----
-
-### 2. Add PostgreSQL
-
-Create a PostgreSQL service:
-
-```
-New
- ↓
-Database
- ↓
-PostgreSQL
-```
-
----
-
-### 3. Configure Environment Variables
-
-Set:
-
-```env
-DATABASE_URL=<Railway PostgreSQL connection string>
-COOKIE_SECURE=true
-```
-
----
-
-### 4. Run Database Migrations
-
-Execute:
+Run static analysis:
 
 ```bash
-goose -dir internal/db/migrations postgres "$DATABASE_URL" up
+go vet ./...
 ```
 
 ---
 
-### 5. Enable Persistent Upload Storage
+## Deployment
 
-Create a Railway Volume and mount it to:
+The application can be deployed using platforms such as:
 
-```text
-web/static/uploads
-```
+* Railway
+* Render
+* Fly.io
 
-so uploaded images remain available after redeployment.
+Deployment requires:
 
----
-
-### 6. Deploy
-
-Push changes to GitHub:
-
-```bash
-git push
-```
-
-Railway automatically builds and deploys the application.
-
----
-
-# Security Highlights
-
-* Passwords are hashed using bcrypt
-* Sessions use secure random tokens
-* Session data is stored server-side
-* CSRF protection is enabled
-* Secure cookie configuration
-* Private posts are protected by authorization checks
-* Only owners can delete posts
-* Uploaded files are validated by actual content
-* Request body limits are enforced
-
----
-
-# Project Requirements
-
-Developed as the final project for:
-
-**Goraz Final Module - APA Bootcamp**
-
-Implemented requirements:
-
-* Authentication
-* Public and private posts
-* Private post sharing
-* Access control
-* Comments
-* Image uploads
-* Cloud deployment configuration
+* PostgreSQL database
+* Environment variables
+* Persistent storage for uploaded images
