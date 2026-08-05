@@ -1,6 +1,11 @@
 {{define "navbar"}}
 <nav>
+<div class="nav-left">
 <a class="brand" href="/weblog">Weblog</a>
+{{if .CurrentUser}}
+<a href="/weblog/new" class="btn">New Post</a>
+{{end}}
+</div>
 {{if .CurrentUser}}
 <div class="user-card">
 <div class="avatar">{{slice .CurrentUser.Username 0 1}}</div>
