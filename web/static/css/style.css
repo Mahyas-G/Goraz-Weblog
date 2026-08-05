@@ -61,7 +61,7 @@ nav {
 .nav-left {
 	display: flex;
 	align-items: center;
-	gap: 1.5rem;
+	gap: 1.1rem;
 }
 
 nav .brand {
@@ -69,7 +69,7 @@ nav .brand {
 	font-weight: 700;
 	color: var(--navy);
 	text-decoration: none;
-	margin-right: 1.5rem;
+	margin-right: 1.1rem;
 }
 
 nav .nav-links {
