@@ -1,7 +1,8 @@
 {{define "content"}}
 <h1>New Post</h1>
 {{if .Error}}<p class="error-text">{{.Error}}</p>{{end}}
-<form method="POST" action="/weblog" enctype="multipart/form-data">
+<p id="client-error" class="error-text" style="display: none;"></p>
+<form id="create-form" method="POST" action="/weblog" enctype="multipart/form-data">
 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 <input type="text" name="title" placeholder="Title" value="{{.Title}}" required>
 <textarea name="content" placeholder="Content" required>{{.Content}}</textarea>
@@ -10,14 +11,28 @@
 <option value="private" {{if eq .Privacy "private"}}selected{{end}}>Private</option>
 </select>
 <input type="text" name="shared_usernames" id="shared-usernames" placeholder="Share with usernames (comma-separated)" value="{{.SharedUsernames}}">
-<input type="file" name="image" accept="image/jpeg,image/png,image/webp">
-<button type="submit">Publish</button>
+<input type="file" name="image" id="image-input" accept="image/jpeg,image/png,image/webp">
+<div id="upload-progress-wrap" class="upload-progress-wrap" style="display: none;">
+<progress id="upload-progress" value="0" max="100"></progress>
+<span id="upload-progress-label">0%</span>
+</div>
+<button type="submit" id="submit-button">Publish</button>
 </form>
 <p><a href="/weblog">Back to feed</a></p>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 	var privacySelect = document.getElementById('privacy-select');
 	var sharedInput = document.getElementById('shared-usernames');
+	var form = document.getElementById('create-form');
+	var imageInput = document.getElementById('image-input');
+	var progressWrap = document.getElementById('upload-progress-wrap');
+	var progressBar = document.getElementById('upload-progress');
+	var progressLabel = document.getElementById('upload-progress-label');
+	var clientError = document.getElementById('client-error');
+	var submitButton = document.getElementById('submit-button');
+
+	var maxImageBytes = 5 * 1024 * 1024;
+	var allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
 	function toggleSharedInput() {
 		var isPrivate = privacySelect.value === 'private';
@@ -26,6 +41,64 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	privacySelect.addEventListener('change', toggleSharedInput);
 	toggleSharedInput();
+
+	form.addEventListener('submit', function (event) {
+		event.preventDefault();
+		clientError.textContent = '';
+		clientError.style.display = 'none';
+
+		var file = imageInput.files[0];
+		if (file) {
+			if (file.size > maxImageBytes) {
+				clientError.textContent = 'Image must be smaller than 5MB';
+				clientError.style.display = '';
+				return;
+			}
+			if (allowedImageTypes.indexOf(file.type) === -1) {
+				clientError.textContent = 'Image must be jpg, png, or webp';
+				clientError.style.display = '';
+				return;
+			}
+		}
+
+		var formData = new FormData(form);
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', form.action, true);
+
+		xhr.upload.addEventListener('progress', function (progressEvent) {
+			if (!progressEvent.lengthComputable) {
+				return;
+			}
+			var percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+			progressBar.value = percent;
+			progressLabel.textContent = percent + '%';
+		});
+
+		xhr.addEventListener('load', function () {
+			submitButton.disabled = false;
+			if (xhr.status >= 200 && xhr.status < 300) {
+				window.location.href = xhr.responseURL;
+				return;
+			}
+			progressWrap.style.display = 'none';
+			document.open();
+			document.write(xhr.responseText);
+			document.close();
+		});
+
+		xhr.addEventListener('error', function () {
+			submitButton.disabled = false;
+			progressWrap.style.display = 'none';
+			clientError.textContent = 'Upload failed. Please try again.';
+			clientError.style.display = '';
+		});
+
+		submitButton.disabled = true;
+		progressWrap.style.display = '';
+		progressBar.value = 0;
+		progressLabel.textContent = '0%';
+		xhr.send(formData);
+	});
 });
 </script>
 {{end}}
