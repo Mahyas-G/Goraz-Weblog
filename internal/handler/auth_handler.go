@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v4"
 
 	"weblog/internal/middleware"
+	"weblog/internal/repository"
 	"weblog/internal/service"
+	"weblog/internal/validation"
 )
 
 type AuthHandler struct {
@@ -29,7 +32,10 @@ func (h *AuthHandler) Signup(c echo.Context) error {
 
 	_, err := h.authService.Signup(username, password)
 	if err != nil {
-		return c.Render(http.StatusUnprocessableEntity, "auth/signup.html", map[string]any{"Error": err.Error()})
+		if isAuthValidationError(err) {
+			return c.Render(http.StatusUnprocessableEntity, "auth/signup.html", map[string]any{"Error": err.Error()})
+		}
+		return c.Render(http.StatusInternalServerError, "auth/signup.html", map[string]any{"Error": "failed to create account"})
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/login")
@@ -45,7 +51,10 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	session, err := h.authService.Login(username, password)
 	if err != nil {
-		return c.Render(http.StatusUnprocessableEntity, "auth/login.html", map[string]any{"Error": err.Error()})
+		if errors.Is(err, service.ErrInvalidCredentials) {
+			return c.Render(http.StatusUnprocessableEntity, "auth/login.html", map[string]any{"Error": err.Error()})
+		}
+		return c.Render(http.StatusInternalServerError, "auth/login.html", map[string]any{"Error": "failed to log in"})
 	}
 
 	cookie := new(http.Cookie)
@@ -75,4 +84,14 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 	c.SetCookie(expired)
 
 	return c.Redirect(http.StatusSeeOther, "/login")
+}
+
+func isAuthValidationError(err error) bool {
+	return errors.Is(err, validation.ErrUsernameEmpty) ||
+		errors.Is(err, validation.ErrUsernameTooShort) ||
+		errors.Is(err, validation.ErrUsernameTooLong) ||
+		errors.Is(err, validation.ErrInvalidUsername) ||
+		errors.Is(err, validation.ErrPasswordTooShort) ||
+		errors.Is(err, validation.ErrPasswordTooLong) ||
+		errors.Is(err, repository.ErrUsernameTaken)
 }
