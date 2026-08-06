@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strings"
 
 	"weblog/internal/auth"
 	"weblog/internal/model"
@@ -21,6 +22,8 @@ func NewAuthService(users *repository.UserRepository, sessions *auth.SessionStor
 }
 
 func (s *AuthService) Signup(username, password string) (*model.User, error) {
+	username = strings.ToLower(strings.TrimSpace(username))
+
 	if err := validation.ValidateUsername(username); err != nil {
 		return nil, err
 	}
@@ -37,6 +40,8 @@ func (s *AuthService) Signup(username, password string) (*model.User, error) {
 }
 
 func (s *AuthService) Login(username, password string) (*model.Session, error) {
+	username = strings.ToLower(strings.TrimSpace(username))
+
 	user, err := s.users.FindByUsername(username)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {

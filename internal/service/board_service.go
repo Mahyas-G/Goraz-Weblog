@@ -123,7 +123,7 @@ func (s *BoardService) resolveUsernames(authorID int, usernames []string) ([]int
 	var ids []int
 
 	for _, raw := range usernames {
-		username := strings.TrimSpace(raw)
+		username := strings.ToLower(strings.TrimSpace(raw))
 		if username == "" {
 			continue
 		}

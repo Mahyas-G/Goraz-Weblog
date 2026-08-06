@@ -2,19 +2,25 @@ package validation
 
 import (
 	"errors"
-	"strings"
+	"regexp"
 
 	"weblog/internal/model"
 )
 
 const (
-	maxTitleLength   = 200
-	maxContentLength = 50000
-	maxCommentLength = 2000
+	maxTitleLength    = 200
+	maxContentLength  = 50000
+	maxCommentLength  = 2000
+	minUsernameLength = 3
+	maxUsernameLength = 20
 )
+
+var usernamePattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
 
 var ErrUsernameEmpty = errors.New("username is required")
 var ErrUsernameTooShort = errors.New("username must be at least 3 characters")
+var ErrUsernameTooLong = errors.New("username must be at most 20 characters")
+var ErrInvalidUsername = errors.New("username must start with a letter and contain only English letters, numbers, and underscores")
 var ErrPasswordTooShort = errors.New("password must be at least 8 characters")
 var ErrTitleEmpty = errors.New("title is required")
 var ErrTitleTooLong = errors.New("title must be at most 200 characters")
@@ -25,12 +31,17 @@ var ErrCommentEmpty = errors.New("comment is required")
 var ErrCommentTooLong = errors.New("comment must be at most 2000 characters")
 
 func ValidateUsername(username string) error {
-	username = strings.TrimSpace(username)
 	if username == "" {
 		return ErrUsernameEmpty
 	}
-	if len(username) < 3 {
+	if len(username) < minUsernameLength {
 		return ErrUsernameTooShort
+	}
+	if len(username) > maxUsernameLength {
+		return ErrUsernameTooLong
+	}
+	if !usernamePattern.MatchString(username) {
+		return ErrInvalidUsername
 	}
 	return nil
 }
