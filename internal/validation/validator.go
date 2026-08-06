@@ -13,6 +13,8 @@ const (
 	maxCommentLength  = 2000
 	minUsernameLength = 3
 	maxUsernameLength = 20
+	minPasswordLength = 8
+	maxPasswordLength = 72
 )
 
 var usernamePattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
@@ -22,6 +24,7 @@ var ErrUsernameTooShort = errors.New("username must be at least 3 characters")
 var ErrUsernameTooLong = errors.New("username must be at most 20 characters")
 var ErrInvalidUsername = errors.New("username must start with a letter and contain only English letters, numbers, and underscores")
 var ErrPasswordTooShort = errors.New("password must be at least 8 characters")
+var ErrPasswordTooLong = errors.New("password must be at most 72 characters")
 var ErrTitleEmpty = errors.New("title is required")
 var ErrTitleTooLong = errors.New("title must be at most 200 characters")
 var ErrContentEmpty = errors.New("content is required")
@@ -47,8 +50,11 @@ func ValidateUsername(username string) error {
 }
 
 func ValidatePassword(password string) error {
-	if len(password) < 8 {
+	if len(password) < minPasswordLength {
 		return ErrPasswordTooShort
+	}
+	if len(password) > maxPasswordLength {
+		return ErrPasswordTooLong
 	}
 	return nil
 }

@@ -45,6 +45,8 @@ func TestValidatePassword(t *testing.T) {
 		{"too short", "short1", ErrPasswordTooShort},
 		{"exactly minimum", "12345678", nil},
 		{"long enough", "correcthorsebatterystaple", nil},
+		{"exactly at max length", strings.Repeat("a", maxPasswordLength), nil},
+		{"too long", strings.Repeat("a", maxPasswordLength+1), ErrPasswordTooLong},
 	}
 
 	for _, tc := range cases {
