@@ -13,10 +13,17 @@ func TestValidateUsername(t *testing.T) {
 		wantErr  error
 	}{
 		{"empty", "", ErrUsernameEmpty},
-		{"whitespace only", "   ", ErrUsernameEmpty},
 		{"too short", "ab", ErrUsernameTooShort},
-		{"valid", "alice", nil},
-		{"valid with surrounding whitespace", "  alice  ", nil},
+		{"too long", strings.Repeat("a", maxUsernameLength+1), ErrUsernameTooLong},
+		{"exactly at max length", strings.Repeat("a", maxUsernameLength), nil},
+		{"valid lowercase", "alice", nil},
+		{"valid mixed case", "Alice", nil},
+		{"valid with digits and underscore", "alice_92", nil},
+		{"starts with digit", "9alice", ErrInvalidUsername},
+		{"starts with underscore", "_alice", ErrInvalidUsername},
+		{"contains space", "ali ce", ErrInvalidUsername},
+		{"contains non-english letters", "علی", ErrInvalidUsername},
+		{"contains symbol", "alice!", ErrInvalidUsername},
 	}
 
 	for _, tc := range cases {
